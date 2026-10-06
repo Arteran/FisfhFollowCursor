@@ -35,14 +35,14 @@ let currentAction = null;
 
 function changeAnimation(newAction) {
   if (!newAction || currentAction === newAction) return;
-
+  
   if (currentAction) {
     currentAction.stop();
   }
-
+  
   newAction.reset();
   newAction.play();
-
+  
   currentAction = newAction;
 }
 
@@ -60,7 +60,7 @@ loader.load('/clown_fish_low_poly_animated.glb',
     scene.add(fish);
 
     mixer = new THREE.AnimationMixer(fish);
-
+    
     swimAction = createAction(gltf.animations[0], 'swim', 171, 212);
     biteAction = createAction(gltf.animations[2], 'bite', 619, 668);
     idleAction = createAction(gltf.animations[1], 'idle', 10, 170);
@@ -72,26 +72,7 @@ loader.load('/clown_fish_low_poly_animated.glb',
   (error) => { }
 );
 
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-const targetPoint = new THREE.Vector3();
-
-const dummy = new THREE.Object3D();
-
-document.addEventListener('mousemove', (event) => {
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-  raycaster.setFromCamera(mouse, camera);
-
-  raycaster.ray.intersectPlane(plane, targetPoint);
-
-  if (targetPoint) {
-    moveFish(targetPoint.x, targetPoint.y);
-  }
-});
-
+// Перемикач за допомогою кнопок 1, 2, 3 на клавіатурі
 window.addEventListener('keydown', (event) => {
   if (event.key === '1') {
     console.log('Перемикаємо на: swim');
@@ -107,53 +88,22 @@ window.addEventListener('keydown', (event) => {
   }
 });
 
+
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
 });
 
-const moveFish = (target_x, target_y) => {
-  if (!fish) return;
-  
-  const currentPos = fish.position.clone();
-  const cursorPos = new THREE.Vector3(target_x, target_y, 0);
-  
-  const distance = currentPos.distanceTo(cursorPos);
-  
-  const stopDistance = 4; 
-  if (distance <= stopDistance + 0.1) {
-    return;
-  }
-
-  const direction = new THREE.Vector3().subVectors(cursorPos, currentPos).normalize();
-  
-  const finalPos = cursorPos.clone().sub(direction.multiplyScalar(stopDistance));
-
-  gsap.to(fish.position, { duration: 1, x: finalPos.x, y: finalPos.y, ease: "power1.out" });
-
-  dummy.position.copy(fish.position);
-  dummy.lookAt(cursorPos); 
-
-  gsap.to(fish.rotation, { 
-    duration: 0.5, 
-    x: dummy.rotation.x, 
-    y: dummy.rotation.y, 
-    z: dummy.rotation.z, 
-    ease: "power1.out" 
-  });
-}
-
-const lookAt = () => {
-  if (!fish) return;
-
-}
-
+// gsap.to(fish.position, {duration: 10, x: 10, y: 10, z: 10, ease: "power1.out"})
 
 
 function animate() {
   requestAnimationFrame(animate);
   if (fish) {
+    // fish.rotation.y = 1.6;
+    // fish.rotation.x += 0.01;
+    // fish.position.z += 0.1;     
     if (mixer) mixer.update(0.01);
   }
   renderer.render(scene, camera);
